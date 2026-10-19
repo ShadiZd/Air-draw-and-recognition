@@ -1,144 +1,239 @@
-# Air Draw
+# 🎨 Air Draw — Hand Gesture Drawing & AI Recognition Game
 
-Full-screen "air drawing" app controlled by hand gestures (via MediaPipe),
-with a CNN that recognizes what you've drawn and shows it live on screen.
+**Air Draw** is a computer vision and machine learning project that lets users draw in the air using their hands and a webcam. It combines MediaPipe hand tracking with a Convolutional Neural Network (CNN) trained to recognize drawings, turning a simple drawing application into an interactive AI-powered experience.
 
-- **LEFT hand** — makes a gesture that sets the tool: `Draw`, `Erase`,
-  `Clear`, `Change` (color).
-- **RIGHT hand** — its index fingertip is the "pen."
-- The drawn canvas is continuously fed to a CNN, which shows its best
-  guess (`Recognized: <label> (xx%)`) in the HUD next to the mode and
-  color indicator.
+The project includes a drawing application, an enhanced drawing implementation, and a five-round recognition game that challenges users to draw randomly selected objects as quickly and accurately as possible.
 
----
+LinkedIn post: https://lnkd.in/p/en7kubUj
 
-## Project structure
+## ✨ Key Features
 
-```
+### 🖐️ Air Drawing
+- Draw on a virtual canvas using hand movements.
+- Track hand landmarks in real time with MediaPipe.
+- Use hand gestures to control drawing tools.
+- Change colors, erase strokes, and clear the canvas.
+- Freeze or resume the camera feed using the `SPACE` key in the supported implementation.
+
+### 🧠 CNN Drawing Recognition
+- Recognize sketches using a trained Convolutional Neural Network.
+- Train the classifier on Google's Quick, Draw! dataset.
+- Display predicted drawing labels and confidence scores.
+- Export the trained model to TensorFlow Lite for lightweight inference.
+
+### 🎮 AI Drawing Challenge
+- Play a five-round drawing challenge.
+- Receive a randomly selected drawing target from the trained classes.
+- Draw the target in the air while the CNN evaluates your sketch.
+- Complete each round when the target is recognized.
+- View your overall completion time and recognition accuracy at the end.
+
+## 🛠️ Technologies
+
+| Technology | Purpose |
+|---|---|
+| Python | Application logic |
+| OpenCV | Webcam access and image processing |
+| MediaPipe | Real-time hand tracking |
+| NumPy | Numerical computation and dataset processing |
+| TensorFlow / Keras | CNN training |
+| TensorFlow Lite / LiteRT | Lightweight model inference |
+
+## 📂 Project Structure
+
+```text
 Air_Drawing/
-├── .venv/                  # runtime environment: run air_draw.py here
-├── train_venv/              # training environment: run training scripts here
-├── dataset/                 # QuickDraw .npy files (see below)
-├── encodings_draw/          # recorded LEFT-hand gesture encodings (Draw/Erase/Clear/Change)
-├── models/                  # training output (draw_classifier.keras/.tflite, draw_labels.json)
-├── air_draw.py               # main app — run this
-├── collect_draw_signs.py     # records the LEFT-hand gestures into encodings_draw/
-├── draw_signrec.py           # left/right hand tracking + gesture matching (MediaPipe)
-├── simple_signrec.py         # base landmark-encoding / nearest-neighbour matching
-├── draw_classifier.py        # loads the trained TFLite model, used by air_draw.py
-├── train_draw_classifier.py  # trains the CNN on dataset/ → models/
-└── export_tflite.py          # re-exports an existing .keras model to .tflite (no retraining)
+├── models/
+│   ├── draw_classifier.keras
+│   ├── draw_classifier.tflite
+│   └── draw_labels.json
+├── dataset/                  # QuickDraw training data
+├── encodings_draw/           # Recorded hand gesture encodings
+├── air_draw.py               # Main air drawing application
+├── new_air_draw.py           # Enhanced air drawing implementation
+├── game.py                   # Five-round AI drawing challenge
+├── collect_draw_signs.py     # Collect hand gesture encodings
+├── draw_signrec.py           # Hand gesture recognition
+├── simple_signrec.py         # Basic gesture matching
+├── draw_classifier.py        # CNN classifier and predictions
+├── train_draw_classifier.py  # Train the CNN model
+├── export_tflite.py          # Export the trained model
+└── .gitignore
 ```
 
-### `dataset/`
-Download category files from Google's QuickDraw dataset (numpy bitmap
-format) here:
-https://console.cloud.google.com/storage/browser/quickdraw_dataset/full/numpy_bitmap
+## 🚀 Getting Started
 
-Each downloaded file is named `full_numpy_bitmap_<category>.npy` and
-contains thousands of flattened 28×28 drawings for that category — drop
-them straight into `dataset/` as-is, no need to rename or sort into
-subfolders. The label used for training is the `<category>` part of the
-filename.
+### 1. Clone the repository
 
----
-
-## Why two virtual environments?
-
-`tensorflow` (needed for training) and `mediapipe` (needed for hand
-tracking) require conflicting versions of `protobuf`. Rather than fight
-that conflict, training and running are split into two separate venvs:
-
-- **`train_venv`** — has full TensorFlow. Only used to run
-  `train_draw_classifier.py` / `export_tflite.py`.
-- **`.venv`** — has MediaPipe + a lightweight TFLite interpreter
-  (no TensorFlow at all). Used to run `air_draw.py` day-to-day.
-
-They never need to be active at the same time.
-
-### `train_venv` — libraries
-
-```
-pip install tensorflow numpy opencv-python scikit-learn
+```bash
+git clone https://github.com/ShadiZd/Air-draw-and-recognition.git
+cd Air-draw-and-recognition
 ```
 
-If you hit a `protobuf`-related import error in this venv, force an
-upgrade (this venv has no MediaPipe to conflict with):
-```
-pip install -U protobuf
+### 2. Set up the runtime environment
+
+Use a compatible Python version and create a virtual environment:
+
+```bash
+python -m venv .venv
 ```
 
-### `.venv` — libraries
+Activate it in Windows PowerShell:
 
+```powershell
+.\.venv\Scripts\Activate.ps1
 ```
+
+Install the runtime dependencies:
+
+```bash
 pip install mediapipe==0.10.14 protobuf==4.25.3 ai-edge-litert numpy opencv-python
 ```
 
-`ai-edge-litert` is the actively-maintained TFLite runtime — it runs the
-exported model without needing TensorFlow or a conflicting `protobuf`.
+> The project separates runtime and training environments to help avoid dependency conflicts between MediaPipe and TensorFlow.
+
+### 3. Prepare gesture encodings
+
+The drawing application uses recorded hand gestures to control drawing tools. If the required encodings are missing, run:
+
+```bash
+python collect_draw_signs.py
+```
+
+Follow the instructions to record the required gestures.
+
+### 4. Run the drawing application
+
+For the standard drawing application:
+
+```bash
+python air_draw.py
+```
+
+For the enhanced implementation:
+
+```bash
+python new_air_draw.py
+```
+
+For the AI drawing challenge:
+
+```bash
+python game.py
+```
+
+Ensure that your webcam, gesture encodings, and required model files are available before launching the applications.
+
+## 🧠 Training the CNN
+
+Air Draw includes a CNN training pipeline based on Google's Quick, Draw! dataset.
+
+### 1. Download the dataset
+
+Get the NumPy bitmap files from the [Quick, Draw! dataset](https://console.cloud.google.com/storage/browser/quickdraw_dataset/full/numpy_bitmap).
+
+Place the selected files inside `dataset/`:
+
+```text
+dataset/
+├── full_numpy_bitmap_apple.npy
+├── full_numpy_bitmap_banana.npy
+└── full_numpy_bitmap_cat.npy
+```
+
+Each filename determines its class label. For example, `full_numpy_bitmap_apple.npy` represents the `apple` class.
+
+**Note:** The dataset files are not included in the repository by default because they can be very large.
+
+### 2. Create the training environment
+
+```bash
+python -m venv train_venv
+```
+
+Activate it:
+
+```powershell
+.\train_venv\Scripts\Activate.ps1
+```
+
+Install the training dependencies:
+
+```bash
+pip install tensorflow numpy opencv-python scikit-learn
+```
+
+### 3. Train the model
+
+```bash
+python train_draw_classifier.py
+```
+
+The training script processes the available dataset classes, trains the CNN, and saves model artifacts in `models/`.
+
+Expected outputs include:
+
+- `draw_classifier.keras` — trained Keras model.
+- `draw_labels.json` — class label information.
+- `draw_classifier.tflite` — lightweight inference model.
+
+To export an existing Keras model without retraining:
+
+```bash
+python export_tflite.py
+```
+
+## ⌨️ Controls
+
+The available controls depend on the implementation you launch.
+
+- `ESC` or `Q` — Quit the application.
+- `C` — Clear the canvas.
+- `SPACE` — Freeze or resume the camera feed in the supported implementation.
+
+Hand gestures control the drawing tools. Follow the application's instructions for the available gestures and their mappings.
+
+## 🔧 Troubleshooting
+
+**The webcam does not open**
+- Check that the camera is connected and available.
+- Close other applications using the webcam.
+- Verify that OpenCV and MediaPipe are installed correctly.
+
+**Hand gestures are not recognized**
+- Ensure that the required gesture encodings exist.
+- Run `collect_draw_signs.py` to record them if necessary.
+- Keep your hands visible and well positioned in the camera view.
+
+**The CNN does not recognize drawings**
+- Confirm that the model files exist in `models/`.
+- Ensure that the class labels match the trained model.
+- Verify that the classifier's expected input format matches the processed drawing.
+- Retrain the model if the available classes or training data have changed.
+
+## 🔮 Future Improvements
+
+- Improve recognition accuracy and robustness.
+- Add more drawing categories and gesture controls.
+- Introduce difficulty levels and more game modes.
+- Track high scores and completion times across sessions.
+- Optimize the drawing and prediction pipeline for real-time performance.
+
+## 🤝 Contributions
+
+Suggestions, bug reports, and contributions are welcome!
+
+1. Fork the repository.
+2. Create a feature branch.
+3. Implement and test your changes.
+4. Submit a pull request describing your improvements.
+
+## 📄 License
+
+A license has not yet been specified. Add a `LICENSE` file if you intend to define how others may use, modify, and distribute the project.
 
 ---
 
-## How to train the model (summary)
+**Developed by Shadi Zyoud**
 
-1. Download some QuickDraw category files into `dataset/` (see above).
-2. Activate `train_venv`.
-3. Run:
-   ```
-   python train_draw_classifier.py
-   ```
-   This will:
-   - Load every `.npy` file in `dataset/`, using the filename as the
-     label (e.g. `full_numpy_bitmap_cake.npy` → label `cake`).
-   - Split each file's stacked drawings into individual 28×28 samples
-     (capped at `MAX_SAMPLES_PER_CLASS`, default 1500, per label — raise
-     this for more accuracy at the cost of longer training).
-   - Train a small CNN (Conv/BatchNorm/Pool ×3 → GlobalAvgPool → Dense).
-   - Save `models/draw_classifier.keras`, `models/draw_labels.json`, and
-     `models/draw_classifier.tflite`.
-4. If the `.tflite` export step ever fails on its own (rare, but can
-   happen with some TensorFlow builds) without needing to retrain:
-   ```
-   python export_tflite.py
-   ```
-5. Copy/keep the `models/` folder where `.venv`'s `air_draw.py` can find
-   it (same project folder).
-
----
-
-## How to run the app
-
-1. Make sure `encodings_draw/` exists — if not, activate `.venv` and run
-   `collect_draw_signs.py` first to record your LEFT-hand gestures
-   (Draw / Erase / Clear / Change).
-2. Make sure `models/draw_classifier.tflite` and `models/draw_labels.json`
-   exist (see training above).
-3. Activate `.venv`.
-4. Run:
-   ```
-   python air_draw.py
-   ```
-
-**Controls:**
-- `ESC` / `q` — quit
-- `c` — clear canvas manually
-- `SPACE` — freeze/unfreeze the camera feed (releases the webcam while
-  frozen so other programs can use it)
-
-**HUD:** top bar shows current `Mode`, `Color`, and
-`Recognized: <label> (xx%)` — the CNN's live guess at what's been drawn.
-Recognition is throttled (~once every 0.75s) rather than running every
-frame, and only kicks in once there's enough ink on the canvas.
-
----
-
-## Notes / troubleshooting
-
-- If `Recognized:` never changes from `-`, check the terminal — with
-  `debug=True` (the default in `draw_classifier.py`), it prints the raw
-  top-3 guesses and their confidence every prediction, even when below
-  the display threshold (default 55%, set via `CONFIDENCE_THRESHOLD` in
-  `draw_classifier.py`).
-- More samples per class and more distinct classes generally improve
-  accuracy — `MAX_SAMPLES_PER_CLASS` in `train_draw_classifier.py` is
-  the easiest first knob to raise.
+*Combining computer vision, hand gestures, and machine learning to make drawing interactive.*
