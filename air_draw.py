@@ -40,7 +40,6 @@ import cv2
 import numpy as np
 
 from draw_signrec import DrawSignRec
-from draw_classifier import DrawClassifier, PredictionThrottle
 
 ENCODINGS_DIR = "encodings_draw"
 WINDOW_NAME = "Air Draw"
@@ -97,11 +96,6 @@ def main():
     frozen = False
     frozen_frame = None  # last composed frame shown while frozen
 
-    # ---- drawing recognition (CNN) ----
-    classifier = DrawClassifier()
-    predict_throttle = PredictionThrottle(interval_sec=0.75)
-    last_prediction_text = classifier.format_hud_text(None, 0.0)
-
     while True:
         if not frozen:
             ret, frame = cap.read()
@@ -138,17 +132,11 @@ def main():
 
             if mode == "Clear" and just_entered_mode:
                 canvas[:] = 0
-                last_prediction_text = classifier.format_hud_text(None, 0.0)
 
             if mode == "Change" and just_entered_mode:
                 color_idx = (color_idx + 1) % len(COLORS)
 
             prev_mode = mode
-
-            # ---- recognize what's been drawn (throttled CNN inference) ----
-            if classifier.is_ready and predict_throttle.should_predict():
-                label, confidence = classifier.predict(canvas)
-                last_prediction_text = classifier.format_hud_text(label, confidence)
 
             # ---- compose the final frame: camera + canvas overlay ----
             ink_mask = canvas.any(axis=2)
@@ -170,8 +158,7 @@ def main():
                 pt = get_point(right_hand["landmarks"], INDEX_FINGERTIP, w, h)
                 cv2.circle(display, pt, 8, COLORS[color_idx], -1)
 
-            hud = (f"Mode: {mode or '-'}   Color: {color_idx + 1}/{len(COLORS)}   "
-                   f"{last_prediction_text}")
+            hud = f"Mode: {mode or '-'}   Color: {color_idx + 1}/{len(COLORS)}"
             cv2.rectangle(display, (0, 0), (w, 40), (0, 0, 0), -1)
             cv2.putText(display, hud, (10, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
                         (255, 255, 255), 2)
@@ -196,7 +183,6 @@ def main():
             break
         elif key == ord('c'):
             canvas[:] = 0
-            last_prediction_text = classifier.format_hud_text(None, 0.0)
         elif key == ord(' '):
             frozen = not frozen
             if frozen:

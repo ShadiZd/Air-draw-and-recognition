@@ -1,0 +1,12 @@
+﻿.venv/
+train_venv/
+__pycache__/
+*.py[cod]
+.env
+.vscode/
+
+# Generated encoding files
+encodings_draw/
+
+# Large training datasets (not uploading in this update)
+dataset/

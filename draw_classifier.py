@@ -29,13 +29,25 @@ Design notes:
 """
 
 import os
+import sys
 import json
 import time
 
 import cv2
 import numpy as np
 
-MODEL_DIR = "models"
+
+def resource_dir():
+    """Base directory for bundled data (works both frozen and unfrozen)."""
+    if getattr(sys, "frozen", False):
+        return getattr(sys, "_MEIPASS", os.path.dirname(sys.executable))
+    return os.path.dirname(os.path.abspath(__file__))
+
+
+if getattr(sys, "frozen", False):
+    MODEL_DIR = os.path.join(resource_dir(), "models")
+else:
+    MODEL_DIR = "models"
 MODEL_PATH = os.path.join(MODEL_DIR, "draw_classifier.tflite")
 LABELS_PATH = os.path.join(MODEL_DIR, "draw_labels.json")
 
@@ -101,7 +113,11 @@ class DrawClassifier:
         return self.model is not None and len(self.labels) > 0
 
     def _preprocess(self, canvas_bgr):
-        gray = cv2.cvtColor(canvas_bgr, cv2.COLOR_BGR2GRAY)
+        # Turn every painted pixel into pure white ink, regardless of pen
+        # color, so the model always sees the same white strokes it was
+        # trained on. (e.g. red text-to-gray is ~29, nearly black, which
+        # would otherwise be misclassified.)
+        gray = (canvas_bgr.any(axis=2) * 255).astype(np.uint8)
 
         ink_pixels = int(np.count_nonzero(gray))
         if ink_pixels < MIN_INK_PIXELS:
