@@ -4,8 +4,6 @@
 
 The project includes a drawing application, an enhanced drawing implementation, and a five-round recognition game that challenges users to draw randomly selected objects as quickly and accurately as possible.
 
-LinkedIn post: https://lnkd.in/p/en7kubUj
-
 ## ✨ Key Features
 
 ### 🖐️ Air Drawing
@@ -231,6 +229,11 @@ Suggestions, bug reports, and contributions are welcome!
 ## 📄 License
 
 A license has not yet been specified. Add a `LICENSE` file if you intend to define how others may use, modify, and distribute the project.
+
+## 🔗 Project Showcase
+
+See Air Draw in action, including the hand gesture drawing system, CNN recognition, and AI drawing challenge, in my [LinkedIn project showcase](https://lnkd.in/p/en7kubUj).
+
 
 ---
 
