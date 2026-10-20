@@ -10,3 +10,21 @@ encodings_draw/
 
 # Large training datasets (not uploading in this update)
 dataset/
+# Python environments
+venv/
+.venv/
+train_venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Generated datasets, encodings, and models
+dataset/**
+!dataset/.gitkeep
+
+encodings_draw/**
+!encodings_draw/.gitkeep
+
+models/**
+!models/.gitkeep
